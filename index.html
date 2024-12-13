@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel="stylesheet" href="style.css">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>QD1-R01 QD2-R01</title>
+</head>
+<body>
+    <div class="image-container">
+        <img src="QD1-R01.jpg" alt="">
+        <img src="QD2-R01.jpg" alt="">
+        
+    </div>
+    <script>
+        const container = document.querySelector('.image-container');
+        const images = document.querySelectorAll('.image-container img');
+
+        let scale = 1;
+
+        images.forEach((img) => {
+        img.addEventListener('wheel', (event) => {
+            event.preventDefault();
+
+            
+            const zoomFactor = 0.1;
+            scale += event.deltaY > 0 ? -zoomFactor : zoomFactor;
+            //scale = Math.max(1, scale);
+
+            
+            const rect = img.getBoundingClientRect();
+            const originX = (event.clientX - rect.left) / rect.width;
+            const originY = (event.clientY - rect.top) / rect.height;
+
+            img.style.transformOrigin = `${originX * 100}% ${originY * 100}%`;
+            img.style.transform = `scale(${scale})`;
+            });
+        });
+
+
+    </script>
+</body>
+
+
+</html>
