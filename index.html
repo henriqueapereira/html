@@ -14,109 +14,73 @@
     <script>
         const images = document.querySelectorAll('.image-container img');
 
-        images.forEach((img) => {
-            let scale = 1;
-            let lastDistance = null;
-            let isDragging = false;
-            let startX, startY; // Coordenadas de início do arraste
-            let translateX = 0, translateY = 0; // Posição atual da imagem
+images.forEach((img) => {
+    let scale = 1; // Inicializa a escala de zoom
+    let posX = 0, posY = 0; // Inicializa as coordenadas de posição
+    let startX = 0, startY = 0; // Para capturar as coordenadas no início do arraste
+    let isDragging = false;
 
-            // Evento de zoom com scroll (desktop)
-            img.addEventListener('wheel', (event) => {
-                event.preventDefault();
+    // Zoom com a rolagem do mouse
+    img.addEventListener('wheel', (event) => {
+        event.preventDefault();
 
-                const zoomFactor = 0.1;
-                scale += event.deltaY > 0 ? -zoomFactor : zoomFactor;
-                scale = Math.max(0.1, Math.min(scale, 5)); // Limita o zoom entre 0.1 e 5
+        const zoomFactor = 0.1;
+        scale += event.deltaY > 0 ? -zoomFactor : zoomFactor;
 
-                const rect = img.getBoundingClientRect();
-                const originX = (event.clientX - rect.left) / rect.width;
-                const originY = (event.clientY - rect.top) / rect.height;
+        const rect = img.getBoundingClientRect();
+        const originX = (event.clientX - rect.left) / rect.width;
+        const originY = (event.clientY - rect.top) / rect.height;
 
-                img.style.transformOrigin = `${originX * 100}% ${originY * 100}%`;
-                img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-            });
+        img.style.transformOrigin = `${originX * 100}% ${originY * 100}%`;
+        img.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+    });
 
-            // Evento de zoom para dispositivos móveis (pinch)
-            img.addEventListener('touchmove', (event) => {
-                if (event.touches.length === 2) {
-                    event.preventDefault();
+    // Para arraste com mouse
+    img.addEventListener('mousedown', (event) => {
+        isDragging = true;
+        startX = event.clientX - posX;
+        startY = event.clientY - posY;
+        img.style.cursor = "grabbing";
+    });
 
-                    const touch1 = event.touches[0];
-                    const touch2 = event.touches[1];
-                    const currentDistance = Math.sqrt(
-                        Math.pow(touch2.pageX - touch1.pageX, 2) +
-                        Math.pow(touch2.pageY - touch1.pageY, 2)
-                    );
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
+        img.style.cursor = "grab";
+    });
 
-                    if (lastDistance !== null) {
-                        const zoomFactor = (currentDistance - lastDistance) * 0.01;
-                        scale += zoomFactor;
-                        scale = Math.max(0.1, Math.min(scale, 5));
+    document.addEventListener('mousemove', (event) => {
+        if (isDragging) {
+            posX = event.clientX - startX;
+            posY = event.clientY - startY;
 
-                        img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-                    }
+            img.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+        }
+    });
 
-                    lastDistance = currentDistance;
-                }
-            });
+    // Para toque e arraste no mobile
+    img.addEventListener('touchstart', (event) => {
+        if (event.touches.length === 1) {
+            isDragging = true;
+            const touch = event.touches[0];
+            startX = touch.clientX - posX;
+            startY = touch.clientY - posY;
+        }
+    });
 
-            img.addEventListener('touchend', () => {
-                lastDistance = null;
-            });
+    img.addEventListener('touchend', () => {
+        isDragging = false;
+    });
 
-            // Evento de início do arraste
-            img.addEventListener('mousedown', (event) => {
-                event.preventDefault();
-                isDragging = true;
-                startX = event.clientX - translateX;
-                startY = event.clientY - translateY;
-                img.style.cursor = "grabbing";
-            });
+    img.addEventListener('touchmove', (event) => {
+        if (isDragging && event.touches.length === 1) {
+            const touch = event.touches[0];
+            posX = touch.clientX - startX;
+            posY = touch.clientY - startY;
 
-            img.addEventListener('mouseup', () => {
-                isDragging = false;
-                img.style.cursor = "grab";
-            });
-
-            img.addEventListener('mouseleave', () => {
-                isDragging = false;
-                img.style.cursor = "grab";
-            });
-
-            img.addEventListener('mousemove', (event) => {
-                if (isDragging) {
-                    translateX = event.clientX - startX;
-                    translateY = event.clientY - startY;
-
-                    img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-                }
-            });
-
-            // Suporte ao arraste no touch
-            img.addEventListener('touchstart', (event) => {
-                if (event.touches.length === 1) {
-                    isDragging = true;
-                    const touch = event.touches[0];
-                    startX = touch.clientX - translateX;
-                    startY = touch.clientY - translateY;
-                }
-            });
-
-            img.addEventListener('touchend', () => {
-                isDragging = false;
-            });
-
-            img.addEventListener('touchmove', (event) => {
-                if (isDragging && event.touches.length === 1) {
-                    const touch = event.touches[0];
-                    translateX = touch.clientX - startX;
-                    translateY = touch.clientY - startY;
-
-                    img.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-                }
-            });
-        });
+            img.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+        }
+    });
+});
 
     </script>
 </body>
