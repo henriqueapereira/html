@@ -13,15 +13,15 @@
         <img src="QD2-R01.jpg" alt="">
     </div>
     <script>
-        const images = document.querySelectorAll('.image-container img');
+       const images = document.querySelectorAll('.image-container img');
 
 images.forEach((img) => {
-    let scale = 1; // Inicializa a escala de zoom
-    let posX = 0, posY = 0; // Inicializa as coordenadas de posição
-    let startX = 0, startY = 0; // Para capturar as coordenadas no início do arraste
+    let scale = 1;
+    let posX = 0, posY = 0;
+    let startX = 0, startY = 0;
     let isDragging = false;
 
-    // Zoom com a rolagem do mouse
+    // Zoom com scroll (desktop)
     img.addEventListener('wheel', (event) => {
         event.preventDefault();
 
@@ -36,7 +36,7 @@ images.forEach((img) => {
         img.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
     });
 
-    // Para arraste com mouse
+    // Arraste com mouse (desktop)
     img.addEventListener('mousedown', (event) => {
         isDragging = true;
         startX = event.clientX - posX;
@@ -58,25 +58,20 @@ images.forEach((img) => {
         }
     });
 
-    // Para toque e arraste no mobile
-    img.addEventListener('touchstart', (event) => {
-        if (event.touches.length === 1) {
-            isDragging = true;
-            const touch = event.touches[0];
-            startX = touch.clientX - posX;
-            startY = touch.clientY - posY;
-        }
-    });
-
-    img.addEventListener('touchend', () => {
-        isDragging = false;
-    });
-
+    // Zoom com "pinch" no mobile
     img.addEventListener('touchmove', (event) => {
-        if (isDragging && event.touches.length === 1) {
-            const touch = event.touches[0];
-            posX = touch.clientX - startX;
-            posY = touch.clientY - startY;
+        if (event.touches.length === 2) {
+            event.preventDefault();
+
+            const touch1 = event.touches[0];
+            const touch2 = event.touches[1];
+            const distance = Math.hypot(
+                touch2.pageX - touch1.pageX,
+                touch2.pageY - touch1.pageY
+            );
+
+            const zoomFactor = 0.01; // Ajusta a sensibilidade
+            scale += (distance - (scale * 10)) * zoomFactor;
 
             img.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
         }
